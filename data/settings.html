@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=2'/>
+        <style></style>
+    </head>
+    <body>
+        <h3>Energy meter settings</h3>
+        If you don't want to recalibrate a parameter leave it empty.
+        Recalibration:
+        <form action='/calibrate' method='post'>
+            Voltage: <input type='text' name='voltage'><br>
+            Current: <input type='text' name='current'><br>
+            Power: <input type='text' name='power'><br>
+            <input type='submit' value='Calibrate'>
+        </form>
+        <form action='/submit' method='post'>
+            Device name: <input type='text' name='name' value="_NAME_"><br>
+            Refresh rate (sec): <input type='text' name='rrate' value="_RATE_"><br>
+            SSID: <input type='text' name='SSID' value="_SSID_"><br>
+            Password: <input type='text' name='PWD' value="_PASSWORD_"><br>
+            Enable relay on PowerON: <input type='checkbox' name='box' _CHCK_><br>
+            <p style="color:red">[Advanced settings. Proceed with caution!]<br></p>
+            Delay between changing current/voltage mode (do not touch if you don't know what you're doing): <input type='text' name='DELAY' value="_DELAY_"><br>
+            Functionalities enabled: <br>
+            Voltage <input type='checkbox' name='voltagebox' _VOLTAGEBOX_><br>
+            Current <input type='checkbox' name='currentbox' _CURRENTBOX_><br>
+            Send energy measurements to server every <input type='text' name='ENERGYTIME' value="_ENERGYTIME_"> minutes.<br>
+            Collect statistics every <input type='text' name='STATTIME' value="_STATTIME_"> seconds.<br>
+            Send statistics every <input type='text' name='STATSEND' value="_STATSEND_"> probes.<br>
+            Receiving server IP:  <input type='text' name='IP' value="_IP_"><br>
+            Receiving server port: <input type='text' name='PORT' value="_PORT_"><br>
+            <input type='submit' value='Save settings'>
+        </form>
+        <form action="/">
+            <input type="submit" value="Go back to main page" />
+        </form>
+    </body>

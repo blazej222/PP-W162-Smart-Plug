@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=2'/>
+        <meta http-equiv='refresh' content='_RATE_; url=/'/>
+        <style></style>
+    </head>
+    <body>
+        <h3>Energy meter _NAME_</h3>
+        Active power: _POWER_ W<br>
+        Voltage: _VOLTAGE_ V<br>
+        Current: _CURRENT_ A<br>
+        [Debug section]: <br>
+        Power pulse: _PWRPULSE_<br>
+        Voltage pulse: _VPULSE_<br>
+        Current pulse: _CPULSE_<br>
+        Power multiplier: _PMUL_ <br>
+        Voltage multiplier: _VMUL_ <br>
+        Current multiplier: _CMUL_ <br>
+        Power Pulse count: _PPULSE_ <br>
+        <form action="/settings">
+        <input type="submit" value="Settings" />
+        </form>
+        Relay status: _RELAY_ <br>
+        <form action="/enable">
+            <input type="submit" value="Enable relay" />
+        </form>
+        <form action="/disable">
+            <input type="submit" value="Disable relay" />
+        </form>
+        Energy used: _ENERGY_ Wh
+        <form action="/reset">
+            <input type="submit" value="Reset energy measurements" />
+        </form>
+    </body>
