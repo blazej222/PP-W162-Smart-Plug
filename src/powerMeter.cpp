@@ -1,75 +1,77 @@
-#include "defines.h"
 #include <Arduino.h>
+#include "defines.h"
 #include "powerMeter.h"
 
-PowerMeter::PowerMeter(uint8_t _relay,uint8_t _sel,uint8_t _cf1,uint8_t _cf) : relay(_relay),sel(_sel),cf1(_cf1),cf(_cf){
+PowerMeter::PowerMeter(uint8_t _relay,uint8_t _sel,uint8_t _cf1,uint8_t _cf) : relayPin(_relay),selPin(_sel),cf1Pin(_cf1),cfPin(_cf){
   this->setup();
   return;
 };
 
 void PowerMeter::setup(){
-    pinMode(sel,OUTPUT);
-    pinMode(cf1,INPUT);
-    pinMode(cf,INPUT);
-    digitalWrite(sel,LOW); //Measure current instead of voltage
+    pinMode(selPin,OUTPUT);
+    pinMode(cf1Pin,INPUT);
+    pinMode(cfPin,INPUT);
+    digitalWrite(selPin,LOW); //Measure current instead of voltage
 
 }
 
 float PowerMeter::getActivePower(){
-  if ((micros() - last_cf_interrupt) > 500000) power_pulse_width = 0; //if no changes received for some time
-  return (power_pulse_width > 0) ? (float)power_multiplier / (float)power_pulse_width : 0; // return power usage
+  if ((micros() - lastCfInterruptTimestamp) > METERING_TIMEOUT) powerPulseLength = 0; //if no changes received for some time
+  return (powerPulseLength > 0) ? (float)powerMultiplier / (float)powerPulseLength : 0; // return power usage
 }
 
 float PowerMeter::getVoltage(){
+  //TODO:Reset to 0 if timeout reached
   if(!voltageMode){
     swapCfMode();
   }
-   return (voltage_pulse_width > 0) ? (float)voltage_multiplier / (float)voltage_pulse_width : 0;
+   return (voltagePulseLength > 0) ? (float)voltageMultiplier / (float)voltagePulseLength : 0;
 }
 
 float PowerMeter::getCurrent(){
+  //TODO:Reset to 0 if timeout reached
   if(voltageMode){
     swapCfMode();
   }
-   return (current_pulse_width > 0) ? (float)current_multiplier / (float)current_pulse_width : 0;
+   return (currentPulseLength > 0) ? (float)currentMultiplier / (float)currentPulseLength : 0;
 }
 
 unsigned long PowerMeter::getPowerPulse(){
-  return power_pulse_width;
+  return powerPulseLength;
 }
 
 unsigned long PowerMeter::getCurrentPulse(){
   if(voltageMode){
     swapCfMode();
   }
-  return current_pulse_width;
+  return currentPulseLength;
 }
 
 unsigned long PowerMeter::getVoltagePulse(){
   if(!voltageMode){
     swapCfMode();
   }
-  return voltage_pulse_width;
+  return voltagePulseLength;
 }
 
-void IRAM_ATTR PowerMeter::cf1_interrupt() {
+void IRAM_ATTR PowerMeter::cf1Interrupt() {
     unsigned long now = micros();
-    if(voltageMode) voltage_pulse_width = now - last_cf1_interrupt;
-    else current_pulse_width = now - last_cf1_interrupt;
-    last_cf1_interrupt = now;
+    if(voltageMode) voltagePulseLength = now - lastCf1InterruptTimestamp;
+    else currentPulseLength = now - lastCf1InterruptTimestamp;
+    lastCf1InterruptTimestamp = now;
 }
-void IRAM_ATTR PowerMeter::cf_interrupt() {
+void IRAM_ATTR PowerMeter::cfInterrupt() {
     unsigned long now = micros();
-    power_pulse_width = now - last_cf_interrupt;
-    last_cf_interrupt = now;
-    pulse_count++;
+    powerPulseLength = now - lastCfInterruptTimestamp;
+    lastCfInterruptTimestamp = now;
+    pulseCount++;
 }
 
 void PowerMeter::swapCfMode(){
   voltageMode = !voltageMode;
-  digitalWrite(sel,voltageMode);
+  digitalWrite(selPin,voltageMode);
   delay(swapWait);
-  last_cf_interrupt = micros();
+  lastCfInterruptTimestamp = micros();
 }
 
 void PowerMeter::calibrateVoltage(float expected){
@@ -78,46 +80,46 @@ void PowerMeter::calibrateVoltage(float expected){
   Serial.println(expected);
   Serial.println(vlt);
   Serial.println(expected/vlt);
-  voltage_multiplier = (float)voltage_multiplier * (expected/vlt);
+  voltageMultiplier = (float)voltageMultiplier * (expected/vlt);
   }
 }
 
 void PowerMeter::calibrateCurrent(float expected){
   if(getCurrent() != 0)
-  current_multiplier = (float)current_multiplier * (expected/getCurrent());
+  currentMultiplier = (float)currentMultiplier * (expected/getCurrent());
 }
 
 void PowerMeter::calibratePower(float expected){
   if(getActivePower() != 0)
-  power_multiplier = (float)power_multiplier * (expected/getActivePower());
+  powerMultiplier = (float)powerMultiplier * (expected/getActivePower());
 }
 
 unsigned int PowerMeter::getPowerMultiplier(){
-  return power_multiplier;
+  return powerMultiplier;
 }
 
 unsigned int PowerMeter::getCurrentMultiplier(){
-  return current_multiplier;
+  return currentMultiplier;
 }
 
 unsigned int PowerMeter::getVoltageMultiplier(){
-  return voltage_multiplier;
+  return voltageMultiplier;
 }
 
 float PowerMeter::getEnergyMeasurement(){
-  return ((float)power_multiplier / 1000000. / 3600.) * (float)pulse_count ;
+  return ((float)powerMultiplier / 1000000. / 3600.) * (float)pulseCount ;
 }
 
 void PowerMeter::resetEnergyMeasurement(){
-  pulse_count = 0;
+  pulseCount = 0;
 }
 
 void PowerMeter::setMultipliers(unsigned int voltage,unsigned int power,unsigned int current){
-  voltage_multiplier = voltage;
-  power_multiplier = power;
-  current_multiplier = current;
+  voltageMultiplier = voltage;
+  powerMultiplier = power;
+  currentMultiplier = current;
 }
 
 unsigned long long PowerMeter::getPulseCount(){
-  return pulse_count;
+  return pulseCount;
 }

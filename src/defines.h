@@ -5,7 +5,7 @@
 #define CF1_PIN                         5
 #define CF_PIN                          4
 #define BUTTON_PIN                      3
-#define LIGHT_PIN                       13
+#define LED_PIN                         13
 // Check values every 5 seconds
 #define UPDATE_TIME                     5000
 
@@ -21,3 +21,7 @@ Power: 3540000.00
 #define CURRENT_RATIO             26506
 #define VOLTAGE_RATIO             158227 //265613
 #define POWER_RATIO               3540000
+
+//Misc
+#define WIFI_TIMEOUT 10000
+#define METERING_TIMEOUT 500000

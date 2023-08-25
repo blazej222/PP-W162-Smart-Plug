@@ -3,28 +3,28 @@
 class PowerMeter
 {
     //PINS
-    const uint8_t relay;
-    const uint8_t sel;
-    const uint8_t cf1;
-    const uint8_t cf;
+    const uint8_t relayPin;
+    const uint8_t selPin;
+    const uint8_t cf1Pin;
+    const uint8_t cfPin;
     //Variables used with interrupt routines
-    volatile unsigned long power_pulse_width = 0;
-    volatile unsigned long voltage_pulse_width = 0;
-    volatile unsigned long current_pulse_width = 0;
-    volatile unsigned long last_cf_interrupt = 0;
-    volatile unsigned long last_cf1_interrupt = 0;
-    volatile unsigned long long pulse_count = 0;
+    volatile unsigned long powerPulseLength = 0;
+    volatile unsigned long voltagePulseLength = 0;
+    volatile unsigned long currentPulseLength = 0;
+    volatile unsigned long lastCfInterruptTimestamp = 0;
+    volatile unsigned long lastCf1InterruptTimestamp = 0;
+    volatile unsigned long long pulseCount = 0;
 
     bool voltageMode = false;
 
-    unsigned int voltage_multiplier = VOLTAGE_RATIO;
-    unsigned int power_multiplier = POWER_RATIO;
-    unsigned int current_multiplier = CURRENT_RATIO;
+    unsigned int voltageMultiplier = VOLTAGE_RATIO;
+    unsigned int powerMultiplier = POWER_RATIO;
+    unsigned int currentMultiplier = CURRENT_RATIO;
 
     void setup();
     void swapCfMode();
     public:
-        unsigned int swapWait  = 500; //amount of miliseconds to wait before switching current/voltage //TODO:Create proper getters/setters
+        unsigned int swapWait = 500; //amount of miliseconds to wait before switching current/voltage //TODO:Create proper getters/setters
         PowerMeter(uint8_t _relay,uint8_t _sel,uint8_t _cf1,uint8_t _cf);
         float getActivePower();
         float getVoltage();
@@ -35,13 +35,13 @@ class PowerMeter
         unsigned int getVoltageMultiplier();
         unsigned int getCurrentMultiplier();
         unsigned int getPowerMultiplier();
-        void IRAM_ATTR cf1_interrupt();
-        void IRAM_ATTR cf_interrupt();
         unsigned long long getPulseCount();
+        float getEnergyMeasurement();
+        void IRAM_ATTR cf1Interrupt();
+        void IRAM_ATTR cfInterrupt();
         void calibrateVoltage(float expected);
         void calibrateCurrent(float expected);
         void calibratePower(float expected);
         void setMultipliers(unsigned int voltage,unsigned int power,unsigned int current);
-        float getEnergyMeasurement();
         void resetEnergyMeasurement();
 };

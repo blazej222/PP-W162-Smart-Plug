@@ -11,9 +11,9 @@ String mainpage;
 String settingspage;
 String submitpage;
 
-bool relaystatus = false;
+bool relayStatus = false;
 
-uint8_t rate;
+uint8_t mainWebsiteRefreshRate;
 
 void handle_enable(){
     enableRelay();
@@ -27,19 +27,19 @@ void handle_disable(){
 
 void handle_settings(){
     String tmp = settingspage;
-    tmp.replace("_RATE_",String(rate));
+    tmp.replace("_RATE_",String(mainWebsiteRefreshRate));
     tmp.replace("_SSID_",SSID);
     tmp.replace("_PASSWORD_",KEY);
-    tmp.replace("_NAME_",devicename);
+    tmp.replace("_NAME_",deviceName);
     tmp.replace("_DELAY_",String(meter.swapWait));
-    if(autoenable)tmp.replace("_CHCK_","checked");
+    if(enableRelayOnPowerUp)tmp.replace("_CHCK_","checked");
     if(measureVoltage)tmp.replace("_VOLTAGEBOX_","checked");
     if(measureCurrent)tmp.replace("_CURRENTBOX_","checked");
     tmp.replace("_ENERGYTIME_",String(energySendingFrequency));
-    tmp.replace("_STATTIME_",String(statTime));
+    tmp.replace("_STATTIME_",String(statCollectingFrequency));
     tmp.replace("_STATSEND_",String(statSendingFrequency));
-    tmp.replace("_IP_",serveraddr.toString());
-    tmp.replace("_PORT_",String(port));
+    tmp.replace("_IP_",dataCollectingServerIP.toString());
+    tmp.replace("_PORT_",String(dataCollectingServerPort));
     server.send(200, "text/html", tmp);
 }
 
@@ -56,29 +56,29 @@ void handle_calibrate_submit(){
 
 void handle_settings_submit(){
     uint8_t tmp = server.arg("rrate").toInt();
-    if(tmp > 0 && tmp < 1000) rate = tmp;
+    if(tmp > 0 && tmp < 1000) mainWebsiteRefreshRate = tmp;
     String temporary = server.arg("SSID");
     if(!temporary.equals("")) SSID = temporary;
     temporary = server.arg("PWD");
     if(!temporary.equals("")) KEY = temporary;
-    if(server.arg("box") == "on") autoenable = true;
-    else autoenable = false;
+    if(server.arg("box") == "on") enableRelayOnPowerUp = true;
+    else enableRelayOnPowerUp = false;
     if(server.arg("voltagebox") == "on") measureVoltage = true;
     else measureVoltage = false;
     if(server.arg("currentbox") == "on") measureCurrent = true;
     else measureCurrent = false;
-    devicename = server.arg("name");
+    deviceName = server.arg("name");
     meter.swapWait = server.arg("DELAY").toInt();
     energySendingFrequency = server.arg("ENERGYTIME").toInt();
-    statTime = server.arg("STATTIME").toInt();
+    statCollectingFrequency = server.arg("STATTIME").toInt();
     unsigned int tmpx = server.arg("STATSEND").toInt();
     if(statSendingFrequency != tmpx){
         if(stats != nullptr) delete stats;
         statSendingFrequency = tmpx;
         stats = new CollectedStats(statSendingFrequency);
     }
-    serveraddr.fromString(server.arg("IP"));
-    port = server.arg("PORT").toInt();
+    dataCollectingServerIP.fromString(server.arg("IP"));
+    dataCollectingServerPort = server.arg("PORT").toInt();
     generateNewSettings();
     server.send(200,"text/html",submitpage);
 }
@@ -86,7 +86,7 @@ void handle_settings_submit(){
 void handle_root() {
     Serial.println("Entered handle_root()");
     String tosend = mainpage;
-    tosend.replace("_RATE_", String(rate));
+    tosend.replace("_RATE_", String(mainWebsiteRefreshRate));
     //---------------------------------
     tosend.replace("_POWER_",String(meter.getActivePower()));
     if(measureVoltage)
@@ -105,8 +105,8 @@ void handle_root() {
     tosend.replace("_VMUL_",String(meter.getVoltageMultiplier()));
     tosend.replace("_ENERGY_",String(meter.getEnergyMeasurement()));
     tosend.replace("_PPULSE_",String(meter.getPulseCount()));
-    relaystatus ? tosend.replace("_RELAY_","Enabled") : tosend.replace("_RELAY_","Disabled");
-    tosend.replace("_NAME_",devicename);
+    relayStatus ? tosend.replace("_RELAY_","Enabled") : tosend.replace("_RELAY_","Disabled");
+    tosend.replace("_NAME_",deviceName);
     server.send(200, "text/html", tosend);
     delay(100);
 }

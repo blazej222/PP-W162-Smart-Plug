@@ -3,22 +3,22 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-unsigned int statTime = 0; //collect statistics every seconds
+unsigned int statCollectingFrequency = 0; //collect statistics every seconds
 unsigned int energySendingFrequency = 0; //send energy usage every minutes
 unsigned int statSendingFrequency = 0; //send stats every x probes
-IPAddress serveraddr;
+IPAddress dataCollectingServerIP;
 WiFiClient client;
-uint16_t port;
+uint16_t dataCollectingServerPort;
 CollectedStats* stats = nullptr;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"pool.ntp.org",0,86400000);
 
-CollectedStats::CollectedStats(int size){
-    time = new unsigned long[size+20];
-    voltage = new float[size+20];
-    current = new float[size+20];
-    power = new float[size+20];
-    _size = size;
+CollectedStats::CollectedStats(int _size){
+    time = new unsigned long[_size+20];
+    voltage = new float[_size+20];
+    current = new float[_size+20];
+    power = new float[_size+20];
+    size = _size;
     this->zeroStatus();
 }
 
@@ -31,7 +31,7 @@ CollectedStats::~CollectedStats(){
 
 void CollectedStats::zeroStatus(){
     iterator = 0;
-    for(int i = 0;i<_size+20;i++){
+    for(int i = 0;i<size+20;i++){
         time[i] = 0;
         voltage[i] = 0.;
         current[i] = 0.;
@@ -42,22 +42,22 @@ void CollectedStats::zeroStatus(){
 void CollectedStats::collectStat(PowerMeter meter){
     Serial.println("Collecting stats");
     Serial.println(iterator);
-    Serial.println(_size);
+    Serial.println(size);
     time[iterator] = timeClient.getEpochTime();
     if(measureVoltage)voltage[iterator] = meter.getVoltage();
     else voltage[iterator] = 0;
     if(measureCurrent)current[iterator] = meter.getCurrent();
     else current[iterator] = 0;
     power[iterator] = meter.getActivePower();
-    if(iterator == _size-1){
+    if(iterator == size-1){
 
     }
     iterator++;
-    if(iterator >= _size) sendStatistics();
+    if(iterator >= size) sendStatistics();
 }
 
 String CollectedStats::serialize(){
-    String tmp = devicename;
+    String tmp = deviceName;
     tmp += "T:";
     for(int i = 0;i<iterator;i++){
         tmp += time[i];
@@ -83,7 +83,7 @@ String CollectedStats::serialize(){
 
 void CollectedStats::sendStatistics(){
     Serial.println("Sending statistics");
-    if(!client.connect(serveraddr,port)) return;
+    if(!client.connect(dataCollectingServerIP,dataCollectingServerPort)) return;
     if(client.print(this->serialize()) != 0)
     {
         this->zeroStatus();
@@ -94,8 +94,8 @@ void CollectedStats::sendStatistics(){
 
 void sendEnergyData(float x){
     Serial.println("Entered sendEnergyData");
-    Serial.println(client.connect(serveraddr,port));
-    String tmp = devicename;
+    Serial.println(client.connect(dataCollectingServerIP,dataCollectingServerPort));
+    String tmp = deviceName;
     tmp += "E:";
     tmp += String(x);
     Serial.println(client.print(tmp));

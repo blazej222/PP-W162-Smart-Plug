@@ -8,7 +8,7 @@ class CollectedStats{
     float* power;
     float* current;
     int iterator;
-    int _size;
+    int size;
     void sendStatistics();
     String serialize();
     void zeroStatus();
@@ -18,15 +18,15 @@ class CollectedStats{
     void collectStat(PowerMeter meter);
 };
 
-extern unsigned int statTime; //collect statistics every seconds
+extern unsigned int statCollectingFrequency; //collect statistics every seconds
 extern unsigned int energySendingFrequency; //send energy usage every minutes
 extern unsigned int statSendingFrequency; //send stats every x probes
-extern IPAddress serveraddr;
+extern IPAddress dataCollectingServerIP;
 extern WiFiClient client;
-extern uint16_t port;
+extern uint16_t dataCollectingServerPort;
 extern CollectedStats* stats;
 extern NTPClient timeClient;
-extern String devicename;
+extern String deviceName;
 
 void sendEnergyData(float x);
 
