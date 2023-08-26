@@ -21,7 +21,7 @@ float PowerMeter::getActivePower(){
 }
 
 float PowerMeter::getVoltage(){
-  //TODO:Reset to 0 if timeout reached
+  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT) voltagePulseLength = 0;
   if(!voltageMode){
     swapCfMode();
   }
@@ -29,7 +29,7 @@ float PowerMeter::getVoltage(){
 }
 
 float PowerMeter::getCurrent(){
-  //TODO:Reset to 0 if timeout reached
+  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT) currentPulseLength = 0;
   if(voltageMode){
     swapCfMode();
   }
