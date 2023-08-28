@@ -8,27 +8,28 @@
         If you don't want to recalibrate a parameter leave it empty.
         Recalibration:
         <form action='/calibrate' method='post'>
-            Voltage: <input type='text' name='voltage'><br>
-            Current: <input type='text' name='current'><br>
-            Power: <input type='text' name='power'><br>
+            Voltage: <input type='text' name='voltage' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
+            Current: <input type='text' name='current' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
+            Power: <input type='text' name='power' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
             <input type='submit' value='Calibrate'>
         </form>
         <form action='/submit' method='post'>
             Device name: <input type='text' name='name' value="_NAME_"><br>
-            Refresh rate (sec): <input type='text' name='rrate' value="_RATE_"><br>
+            Refresh rate (sec): <input type='text' name='rrate' value="_RATE_" pattern="^\d+$"><br>
             SSID: <input type='text' name='SSID' value="_SSID_"><br>
             Password: <input type='text' name='PWD' value="_PASSWORD_"><br>
             Enable relay on PowerON: <input type='checkbox' name='box' _CHCK_><br>
             <p style="color:red">[Advanced settings. Proceed with caution!]<br></p>
-            Delay between changing current/voltage mode (do not touch if you don't know what you're doing): <input type='text' name='DELAY' value="_DELAY_"><br>
+            Delay between changing current/voltage mode (do not touch if you don't know what you're doing): 
+            <input type='text' name='DELAY' value="_DELAY_" pattern="^\d+$"> miliseconds.<br>
             Functionalities enabled: <br>
             Voltage <input type='checkbox' name='voltagebox' _VOLTAGEBOX_><br>
             Current <input type='checkbox' name='currentbox' _CURRENTBOX_><br>
-            Send energy measurements to server every <input type='text' name='ENERGYTIME' value="_ENERGYTIME_"> minutes.<br>
-            Collect statistics every <input type='text' name='STATTIME' value="_STATTIME_"> seconds.<br>
-            Send statistics every <input type='text' name='STATSEND' value="_STATSEND_"> probes.<br>
-            Receiving server IP:  <input type='text' name='IP' value="_IP_"><br>
-            Receiving server port: <input type='text' name='PORT' value="_PORT_"><br>
+            Send energy measurements to server every <input type='text' name='ENERGYTIME' value="_ENERGYTIME_" pattern="^\d+$"> minutes.<br>
+            Collect statistics every <input type='text' name='STATTIME' value="_STATTIME_" pattern="^\d+$"> seconds.<br>
+            Send statistics every <input type='text' name='STATSEND' value="_STATSEND_" pattern="^\d+$"> probes.<br>
+            Receiving server IP:  <input type='text' name='IP' value="_IP_" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"><br>
+            Receiving server port: <input type='text' name='PORT' value="_PORT_" pattern="^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"><br>
             <input type='submit' value='Save settings'>
         </form>
         <form action="/">

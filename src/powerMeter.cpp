@@ -77,9 +77,6 @@ void PowerMeter::swapCfMode(){
 void PowerMeter::calibrateVoltage(float expected){
   float vlt = getVoltage();
   if(vlt != 0){
-  Serial.println(expected);
-  Serial.println(vlt);
-  Serial.println(expected/vlt);
   voltageMultiplier = (float)voltageMultiplier * (expected/vlt);
   }
 }
