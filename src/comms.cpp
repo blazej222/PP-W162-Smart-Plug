@@ -40,9 +40,12 @@ void CollectedStats::zeroStatus(){
 }
 
 void CollectedStats::collectStat(PowerMeter meter){
-    Serial.println("Collecting stats");
-    Serial.println(iterator);
-    Serial.println(size);
+    debug_print("Collecting stats\n");
+    debug_print("Max storage size:");
+    debug_print(size);
+    debug_print("\nCurrent storage size:");
+    debug_print(iterator);
+    debug_print("\n");
     time[iterator] = timeClient.getEpochTime();
     if(measureVoltage)voltage[iterator] = meter.getVoltage();
     else voltage[iterator] = 0;
@@ -82,22 +85,38 @@ String CollectedStats::serialize(){
 }
 
 void CollectedStats::sendStatistics(){
-    Serial.println("Sending statistics");
-    if(!client.connect(dataCollectingServerIP,dataCollectingServerPort)) return;
-    if(client.print(this->serialize()) != 0)
-    {
-        this->zeroStatus();
-        client.stop();
+    debug_print("Sending statistics to server:");
+    debug_print(dataCollectingServerIP.toString());
+    debug_print('\n');
+    bool result = client.connect(dataCollectingServerIP,dataCollectingServerPort);
+    if(result){
+        debug_print("Succesfully connected.\n");
+    }else{
+        debug_print("Couldn't estabilish connection to server\n");
+        return;
     }
-
+    if(client.print(this->serialize()) != 0) //if we were able to transmit data
+    {
+        debug_print("Data has been succesfully sent, zeroing storage\n");
+        this->zeroStatus();
+    }
+    client.stop();
 }
 
 void sendEnergyData(float x){
-    Serial.println("Entered sendEnergyData");
-    Serial.println(client.connect(dataCollectingServerIP,dataCollectingServerPort));
+    debug_print("Attempting to send energy data to server:");
+    debug_print(dataCollectingServerIP.toString());
+    debug_print('\n');
+    bool result = client.connect(dataCollectingServerIP,dataCollectingServerPort);
+    if(result){
+        debug_print("Succesfully connected.\n");
+    }else{
+        debug_print("Couldn't estabilish connection to server\n");
+        return;
+    }
     String tmp = deviceName;
     tmp += "E:";
     tmp += String(x);
-    Serial.println(client.print(tmp));
+    client.print(tmp);
     client.stop();
 }

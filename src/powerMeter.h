@@ -20,15 +20,17 @@ class PowerMeter
     unsigned int voltageMultiplier = VOLTAGE_RATIO;
     unsigned int powerMultiplier = POWER_RATIO;
     unsigned int currentMultiplier = CURRENT_RATIO;
-
+    unsigned int swapWait = 500; //amount of miliseconds to wait before switching current/voltage
+    
     void setup();
     void swapCfMode();
     public:
-        unsigned int swapWait = 500; //amount of miliseconds to wait before switching current/voltage //TODO:Create proper getters/setters
         PowerMeter(uint8_t _relay,uint8_t _sel,uint8_t _cf1,uint8_t _cf);
         float getActivePower();
         float getVoltage();
         float getCurrent();
+        unsigned int getSwapWait();
+        void setSwapWait(unsigned int x);
         unsigned long getPowerPulse();
         unsigned long getVoltagePulse();
         unsigned long getCurrentPulse();

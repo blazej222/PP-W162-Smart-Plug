@@ -107,6 +107,14 @@ float PowerMeter::getEnergyMeasurement(){
   return ((float)powerMultiplier / 1000000. / 3600.) * (float)pulseCount ;
 }
 
+unsigned int PowerMeter::getSwapWait(){
+  return swapWait;
+}
+
+void PowerMeter::setSwapWait(unsigned int x){
+  swapWait = x;
+}
+
 void PowerMeter::resetEnergyMeasurement(){
   pulseCount = 0;
 }

@@ -32,14 +32,14 @@ void IRAM_ATTR cfIRQ(){
 }
 
 void enableRelay(){
-    Serial.println("Enabling!");
+    debug_print("Enabling relay \n");
     relayStatus = true;
     digitalWrite(RELAY_PIN,HIGH);
     digitalWrite(LED_PIN,LOW);
 }
 
 void disableRelay(){
-    Serial.println("Disabling!");
+    debug_print("Disabling relay \n");
     relayStatus = false;
     digitalWrite(RELAY_PIN,LOW);
     digitalWrite(LED_PIN,HIGH);
@@ -60,12 +60,14 @@ void initWifi(){
       break;
     }
   }; // hang until connection can be made
-  Serial.println("Wifi initialized");
-
+  debug_print("Wifi initialized\n");
+  debug_print("WifiAddr is:");
+  debug_print(WiFi.localIP());
+  debug_print('\n');
 }
 
 void readSettings(){
-  if(!LittleFS.begin())Serial.println("LittleFS intialization failure");
+  if(!LittleFS.begin())debug_print("LittleFS intialization failure \n");
   //delay(1000);
   File settings = LittleFS.open("/config.cfg","r");
   unsigned int currentMultiplier = settings.readStringUntil('\n').toInt();
@@ -79,7 +81,7 @@ void readSettings(){
   deviceName = settings.readStringUntil('\n');
   measureVoltage = settings.readStringUntil('\n').toInt();
   measureCurrent = settings.readStringUntil('\n').toInt();
-  meter.swapWait = settings.readStringUntil('\n').toInt();
+  meter.setSwapWait(settings.readStringUntil('\n').toInt());
   energySendingFrequency = settings.readStringUntil('\n').toInt();
   statCollectingFrequency = settings.readStringUntil('\n').toInt();
   statSendingFrequency = settings.readStringUntil('\n').toInt();
@@ -87,6 +89,7 @@ void readSettings(){
   dataCollectingServerIP.fromString(settings.readStringUntil('\n'));
   dataCollectingServerPort = settings.readStringUntil('\n').toInt();
   settings.close();
+  debug_print("Settings read! \n");
 }
 
 void generateNewSettings(){
@@ -110,7 +113,7 @@ void generateNewSettings(){
   newSettings += '\n';
   newSettings += measureCurrent;
   newSettings += '\n';
-  newSettings += meter.swapWait;
+  newSettings += meter.getSwapWait();
   newSettings += '\n';
   newSettings += energySendingFrequency;
   newSettings += '\n';
@@ -124,44 +127,55 @@ void generateNewSettings(){
   File settings = LittleFS.open("/config.cfg","w");
   settings.write(newSettings.c_str());
   settings.close();
+  debug_print("New settings saved! \n");
 }
 
 void setup() {
   pinMode(RELAY_PIN,OUTPUT);
   pinMode(LED_PIN,OUTPUT);
   pinMode(BUTTON_PIN,INPUT_PULLUP);
-  // Serial.begin(115200);
-  Serial.println("Reading settings");
+
+  #ifdef DEBUG_BUILD //enable Serial output for debuggind
+    Serial.begin(115200);
+  #endif
+
+  debug_print("Reading settings \n");
   readSettings();
   if(enableRelayOnPowerUp){
     enableRelay();
   }
-  Serial.println("Initializing Wifi...");
+  debug_print("Initializing Wifi \n");
   initWifi();
-  Serial.println("Initializing webserver");
+  debug_print("Initializing webserver \n");
   initServer();
-  Serial.println("Setting interrupts...");
+  debug_print("Setting interrupts \n");
   attachInterrupt(digitalPinToInterrupt(CF1_PIN), cf1IRQ, FALLING);
   attachInterrupt(digitalPinToInterrupt(CF_PIN), cfIRQ, FALLING);
+  debug_print("Everything set up, proceeding to loop()\n");
   //delay(2000);
-  Serial.println("WifiAddr is:");
-  Serial.print(WiFi.localIP());
 }
 
 void loop() {
+  //Section responsible for reading input of physical button
+  #ifndef IGNORE_PHYSICAL_BUTTON
   bool buttonState = digitalRead(BUTTON_PIN);
   if(buttonState != 1 && millis()-lastTimeButtonStateChanged >= 400){
     relayStatus ? disableRelay() : enableRelay();
     lastTimeButtonStateChanged = millis();
   }
-  timeClient.update();
+  #endif
+
+  timeClient.update(); //update current time if required
   server.handleClient();
+
   if(WiFi.status() == WL_NO_SSID_AVAIL) initWifi(); //FIXME: Program execution will halt if WiFi signal is lost
-  if(millis()-lastTimeStatCollected >= (statCollectingFrequency*1000) && statCollectingFrequency != 0 && statSendingFrequency != 0){
+
+  if(millis()-lastTimeStatCollected >= (statCollectingFrequency*1000) && statCollectingFrequency != 0 && statSendingFrequency != 0){ //collect statistics
     lastTimeStatCollected = millis();
     stats->collectStat(meter);
   }
-  if(millis()-lastTimeEnergySent >= (energySendingFrequency*60000) && energySendingFrequency != 0){
+
+  if(millis()-lastTimeEnergySent >= (energySendingFrequency*60000) && energySendingFrequency != 0){ //collect energy data
     sendEnergyData(meter.getEnergyMeasurement());
     lastTimeEnergySent = millis();
   }

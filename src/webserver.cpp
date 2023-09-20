@@ -31,7 +31,7 @@ void handle_settings(){
     tmp.replace("_SSID_",SSID);
     tmp.replace("_PASSWORD_",KEY);
     tmp.replace("_NAME_",deviceName);
-    tmp.replace("_DELAY_",String(meter.swapWait));
+    tmp.replace("_DELAY_",String(meter.getSwapWait()));
     if(enableRelayOnPowerUp)tmp.replace("_CHCK_","checked");
     if(measureVoltage)tmp.replace("_VOLTAGEBOX_","checked");
     if(measureCurrent)tmp.replace("_CURRENTBOX_","checked");
@@ -68,7 +68,7 @@ void handle_settings_submit(){
     if(server.arg("currentbox") == "on") measureCurrent = true;
     else measureCurrent = false;
     deviceName = server.arg("name");
-    meter.swapWait = server.arg("DELAY").toInt();
+    meter.setSwapWait(server.arg("DELAY").toInt());
     energySendingFrequency = server.arg("ENERGYTIME").toInt();
     statCollectingFrequency = server.arg("STATTIME").toInt();
     unsigned int tmpx = server.arg("STATSEND").toInt();
@@ -84,7 +84,7 @@ void handle_settings_submit(){
 }
 
 void handle_root() {
-    Serial.println("Entered handle_root()");
+    debug_print("Entered handle_root()\n");
     String tosend = mainpage;
     tosend.replace("_RATE_", String(mainWebsiteRefreshRate));
     //---------------------------------
@@ -122,7 +122,6 @@ void initServer(){
     File mainfile = LittleFS.open("/main.html","r");
     mainpage = mainfile.readString();
     mainfile.close();
-    //Serial.println(mainpage);
     File settingsfile = LittleFS.open("/settings.html","r");
     settingspage = settingsfile.readString();
     settingsfile.close();
