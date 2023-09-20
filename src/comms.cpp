@@ -52,11 +52,9 @@ void CollectedStats::collectStat(PowerMeter meter){
     if(measureCurrent)current[iterator] = meter.getCurrent();
     else current[iterator] = 0;
     power[iterator] = meter.getActivePower();
-    if(iterator == size-1){
-
-    }
     iterator++;
     if(iterator >= size) sendStatistics();
+    if(iterator >= size+20) this->zeroStatus();
 }
 
 String CollectedStats::serialize(){
