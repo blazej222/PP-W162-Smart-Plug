@@ -49,6 +49,7 @@ void initWifi(){
   WiFi.begin(SSID,KEY);
   unsigned long t1 = millis();
   while (WiFi.status() != WL_CONNECTED){
+    yield();
     if(millis()-t1 > WIFI_TIMEOUT){ //if connection cannot be made within reasonable time
       WiFi.disconnect();
       IPAddress local_IP(192,168,1,1);
