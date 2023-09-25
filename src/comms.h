@@ -16,6 +16,7 @@ class CollectedStats{
     CollectedStats(int size);
     ~CollectedStats();
     void collectStat(PowerMeter meter);
+    void forceSendStatistics();
 };
 
 extern unsigned int statCollectingFrequency; //collect statistics every seconds

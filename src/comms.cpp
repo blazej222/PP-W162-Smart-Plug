@@ -39,6 +39,10 @@ void CollectedStats::zeroStatus(){
     }
 }
 
+void CollectedStats::forceSendStatistics(){
+    if(iterator != 0) sendStatistics(); //if there's any data that can be sent, send it
+}
+
 void CollectedStats::collectStat(PowerMeter meter){
     debug_print("Collecting stats\n");
     debug_print("Max storage size:");

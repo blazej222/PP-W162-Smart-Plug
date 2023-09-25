@@ -73,7 +73,10 @@ void handle_settings_submit(){
     statCollectingFrequency = server.arg("STATTIME").toInt();
     unsigned int tmpx = server.arg("STATSEND").toInt();
     if(statSendingFrequency != tmpx){
-        if(stats != nullptr) delete stats;
+        if(stats != nullptr){
+            stats->forceSendStatistics(); //try to send stats before overwriting collected data.
+            delete stats;
+        } 
         statSendingFrequency = tmpx;
         stats = new CollectedStats(statSendingFrequency);
     }
