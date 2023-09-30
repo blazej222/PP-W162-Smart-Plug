@@ -19,9 +19,12 @@ extern uint8_t mainWebsiteRefreshRate; //page refresh rate
 unsigned long lastTimeStatCollected = 0;
 unsigned long lastTimeEnergySent = 0;
 unsigned long lastTimeButtonStateChanged = 0;
+unsigned long lastTimeLEDBlink = 0;
 bool enableRelayOnPowerUp = false;
 bool measureVoltage = true;
 bool measureCurrent = false;
+unsigned short LEDmode = 1; // 0 is disabled, 1 is as relay, 2 is blink every 10 seconds
+bool blinkPhase = false;
 
 void IRAM_ATTR cf1IRQ(){
   meter.cf1Interrupt();
@@ -35,7 +38,7 @@ void enableRelay(){
     debug_print("Enabling relay \n");
     relayStatus = true;
     digitalWrite(RELAY_PIN,HIGH);
-    digitalWrite(LED_PIN,LOW);
+    if(LEDmode == 1)digitalWrite(LED_PIN,LOW);
 }
 
 void disableRelay(){
@@ -46,6 +49,12 @@ void disableRelay(){
 }
 
 void initWifi(){
+  debug_print("SSID:");
+  debug_print(SSID);
+  debug_print("\n");
+  debug_print("Pass:");
+  debug_print(KEY);
+  debug_print("\n");
   WiFi.begin(SSID,KEY);
   unsigned long t1 = millis();
   while (WiFi.status() != WL_CONNECTED){
@@ -56,7 +65,9 @@ void initWifi(){
       IPAddress gateway(192,168,1,1);
       IPAddress subnet(255,255,255,0);
       WiFi.softAPConfig(local_IP, gateway, subnet);
-      WiFi.softAP("Energy Meter","root123root123"); //start own AP
+      debug_print("Cannot connect to network, creating own AP\n");
+      if(WiFi.softAP("Energy Meter","root123root123")) debug_print("Created AP succesfully.\n");
+      else debug_print("Creating AP failed\n");
       break;
     }
   }; // hang until connection can be made
@@ -88,6 +99,7 @@ void readSettings(){
   if(statSendingFrequency != 0) stats = new CollectedStats(statSendingFrequency);
   dataCollectingServerIP.fromString(settings.readStringUntil('\n'));
   dataCollectingServerPort = settings.readStringUntil('\n').toInt();
+  LEDmode = settings.readStringUntil('\n').toInt();
   settings.close();
   debug_print("Settings read! \n");
 }
@@ -124,6 +136,8 @@ void generateNewSettings(){
   newSettings += dataCollectingServerIP.toString();
   newSettings += '\n';
   newSettings += dataCollectingServerPort;
+  newSettings += '\n';
+  newSettings += LEDmode;
   File settings = LittleFS.open("/config.cfg","w");
   settings.write(newSettings.c_str());
   settings.close();
@@ -141,6 +155,7 @@ void setup() {
 
   debug_print("Reading settings \n");
   readSettings();
+  digitalWrite(LED_PIN,HIGH); //disable LED that is enabled by default
   if(enableRelayOnPowerUp){
     enableRelay();
   }
@@ -170,13 +185,26 @@ void loop() {
 
   if(WiFi.status() == WL_NO_SSID_AVAIL) initWifi(); //FIXME: Program execution will halt if WiFi signal is lost
 
-  if(millis()-lastTimeStatCollected >= (statCollectingFrequency*1000) && statCollectingFrequency != 0 && statSendingFrequency != 0){ //collect statistics
+  //collect statistics
+  if(millis()-lastTimeStatCollected >= (statCollectingFrequency*1000) && statCollectingFrequency != 0 && statSendingFrequency != 0){ 
     lastTimeStatCollected = millis();
     stats->collectStat(meter);
   }
 
-  if(millis()-lastTimeEnergySent >= (energySendingFrequency*60000) && energySendingFrequency != 0){ //collect energy data
+  //collect energy data
+  if(millis()-lastTimeEnergySent >= (energySendingFrequency*60000) && energySendingFrequency != 0){ 
     sendEnergyData(meter.getEnergyMeasurement());
     lastTimeEnergySent = millis();
+  }
+  //blink LED light
+  if(millis() - lastTimeLEDBlink >= LED_BLINK_EVERY && blinkPhase == false && LEDmode == 2 && relayStatus){
+    digitalWrite(LED_PIN,LOW);
+    blinkPhase = !blinkPhase;
+    lastTimeLEDBlink = millis();
+  }
+  if(millis() - lastTimeLEDBlink >= LED_BLINK_FOR && blinkPhase == true && LEDmode == 2){
+    digitalWrite(LED_PIN,HIGH);
+    blinkPhase = !blinkPhase;
+    lastTimeLEDBlink = millis();
   }
 }

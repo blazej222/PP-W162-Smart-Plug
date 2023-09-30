@@ -30,6 +30,7 @@ extern unsigned int statCollectingFrequency;
 extern unsigned int statSendingFrequency;
 extern IPAddress dataCollectingServerIP;
 extern uint16_t dataCollectingServerPort;
+extern unsigned short LEDmode;
 
 void handle_enable();
 void handle_disable();

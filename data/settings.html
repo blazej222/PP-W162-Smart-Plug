@@ -19,6 +19,13 @@
             SSID: <input type='text' name='SSID' value="_SSID_"><br>
             Password: <input type='text' name='PWD' value="_PASSWORD_"><br>
             Enable relay on PowerON: <input type='checkbox' name='box' _CHCK_><br>
+
+            <label for="LEDmode">Choose LED light mode:</label>
+            <select name="LEDmode" id="LEDMode">
+                <option value="0" _selected0>Disabled</option>
+                <option value="1" _selected1>Replicate Relay state</option>
+                <option value="2" _selected2>Blink every 10 seconds</option>
+            </select>
             <p style="color:red">[Advanced settings. Proceed with caution!]<br></p>
             Delay between changing current/voltage mode (do not touch if you don't know what you're doing): 
             <input type='text' name='DELAY' value="_DELAY_" pattern="^\d+$"> miliseconds.<br>

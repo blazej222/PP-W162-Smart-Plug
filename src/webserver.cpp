@@ -40,6 +40,9 @@ void handle_settings(){
     tmp.replace("_STATSEND_",String(statSendingFrequency));
     tmp.replace("_IP_",dataCollectingServerIP.toString());
     tmp.replace("_PORT_",String(dataCollectingServerPort));
+    if(LEDmode==0) tmp.replace("_selected0","selected");
+    else if(LEDmode==1) tmp.replace("_selected1","selected");
+    else if(LEDmode==2) tmp.replace("_selected2","selected");
     server.send(200, "text/html", tmp);
 }
 
@@ -82,6 +85,10 @@ void handle_settings_submit(){
     }
     dataCollectingServerIP.fromString(server.arg("IP"));
     dataCollectingServerPort = server.arg("PORT").toInt();
+    LEDmode = server.arg("LEDmode").toInt();
+    if(relayStatus && LEDmode == 1) digitalWrite(LED_PIN,LOW);
+    else if(!relayStatus && LEDmode == 1) digitalWrite(LED_PIN,HIGH);
+    else if(LEDmode == 2 || LEDmode == 0) digitalWrite(LED_PIN,HIGH);
     generateNewSettings();
     server.send(200,"text/html",submitpage);
 }

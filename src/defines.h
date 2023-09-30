@@ -1,7 +1,7 @@
 #pragma once
 //Compilation options
-#define DEBUG_BUILD
-#define IGNORE_PHYSICAL_BUTTON
+// #define DEBUG_BUILD
+// #define IGNORE_PHYSICAL_BUTTON
 // GPIOs
 #define RELAY_PIN                       14
 #define SEL_PIN                         12
@@ -28,6 +28,8 @@ Power: 3540000.00
 //Misc
 #define WIFI_TIMEOUT 10000 //after this time in miliseconds if unable to connect to network, AP will be started
 #define METERING_TIMEOUT 500000 //after this time in microseconds if power meter hasn't received any pulse, pulse value will be reset to 0
+#define LED_BLINK_EVERY 10000
+#define LED_BLINK_FOR 300
 
 #ifdef DEBUG_BUILD
     #define debug_print(x) Serial.print(x)
