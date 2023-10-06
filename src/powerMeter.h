@@ -15,6 +15,10 @@ class PowerMeter
     volatile unsigned long lastCf1InterruptTimestamp = 0;
     volatile unsigned long long pulseCount = 0;
 
+    unsigned long lastPowerPulseLength = 0;
+    unsigned long lastVoltagePulseLength = 0;
+    unsigned long lastCurrentPulseLength = 0;
+
     bool voltageMode = false;
 
     unsigned int voltageMultiplier = VOLTAGE_RATIO;

@@ -17,7 +17,9 @@ void PowerMeter::setup(){
 
 float PowerMeter::getActivePower(){
   if ((micros() - lastCfInterruptTimestamp) > METERING_TIMEOUT) powerPulseLength = 0; //if no changes received for some time
-  return (powerPulseLength > 0) ? (float)powerMultiplier / (float)powerPulseLength : 0; // return power usage
+  unsigned long localPowerPulseLength = powerPulseLength; //make sure an interrupt does not change any values mid processing
+  lastPowerPulseLength = localPowerPulseLength;
+  return (localPowerPulseLength > 0) ? (float)powerMultiplier / (float)localPowerPulseLength : 0; // return power usage
 }
 
 float PowerMeter::getVoltage(){
@@ -25,7 +27,9 @@ float PowerMeter::getVoltage(){
   if(!voltageMode){
     swapCfMode();
   }
-   return (voltagePulseLength > 0) ? (float)voltageMultiplier / (float)voltagePulseLength : 0;
+  unsigned long localVoltagePulseLength = voltagePulseLength;
+  lastVoltagePulseLength = localVoltagePulseLength;
+   return (localVoltagePulseLength > 0) ? (float)voltageMultiplier / (float)localVoltagePulseLength : 0;
 }
 
 float PowerMeter::getCurrent(){
@@ -33,25 +37,37 @@ float PowerMeter::getCurrent(){
   if(voltageMode){
     swapCfMode();
   }
-   return (currentPulseLength > 0) ? (float)currentMultiplier / (float)currentPulseLength : 0;
+  unsigned long localCurrentPulseLength = currentPulseLength;
+  lastCurrentPulseLength = localCurrentPulseLength;
+   return (localCurrentPulseLength > 0) ? (float)currentMultiplier / (float)localCurrentPulseLength : 0;
 }
 
+/**
+ * @return power pulse length registered when last calling getActivePower()
+ */
 unsigned long PowerMeter::getPowerPulse(){
-  return powerPulseLength;
+  return lastPowerPulseLength;
 }
 
+/**
+ * @return current pulse length registered when last calling getCurrent() 
+ */
 unsigned long PowerMeter::getCurrentPulse(){
   if(voltageMode){
     swapCfMode();
   }
-  return currentPulseLength;
+  return lastCurrentPulseLength;
 }
+
+/**
+ * @return voltage pulse length registered when last calling getVoltage()
+ */
 
 unsigned long PowerMeter::getVoltagePulse(){
   if(!voltageMode){
     swapCfMode();
   }
-  return voltagePulseLength;
+  return lastVoltagePulseLength;
 }
 
 void IRAM_ATTR PowerMeter::cf1Interrupt() {

@@ -99,17 +99,17 @@ void handle_root() {
     tosend.replace("_RATE_", String(mainWebsiteRefreshRate));
     //---------------------------------
     tosend.replace("_POWER_",String(meter.getActivePower()));
+    tosend.replace("_PWRPULSE_",String(meter.getPowerPulse()));
     if(measureVoltage)
     {
-        tosend.replace("_VPULSE_",String(meter.getVoltagePulse())); //we keep it near so it executes in the same phase of cf cycle
         tosend.replace("_VOLTAGE_",String(meter.getVoltage()));
+        tosend.replace("_VPULSE_",String(meter.getVoltagePulse()));
     }
     if(measureCurrent)
     {
+        tosend.replace("_CURRENT_",String(meter.getCurrent()));
         tosend.replace("_CPULSE_",String(meter.getCurrentPulse())); 
-        tosend.replace("_CURRENT_",String(meter.getCurrent())); 
     }
-    tosend.replace("_PWRPULSE_",String(meter.getPowerPulse()));
     tosend.replace("_PMUL_",String(meter.getPowerMultiplier()));
     tosend.replace("_CMUL_",String(meter.getCurrentMultiplier()));
     tosend.replace("_VMUL_",String(meter.getVoltageMultiplier()));
