@@ -23,20 +23,34 @@ float PowerMeter::getActivePower(){
 }
 
 float PowerMeter::getVoltage(){
-  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT) voltagePulseLength = 0;
-  if(!voltageMode){
+  if(!meterMode){
     swapCfMode();
   }
+  debug_print("Before entering getVoltage");
+  if(pulsesReceived != 2){
+    unsigned long timestamp = millis();
+    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){
+      yield();
+    } //busy wait until we get frequency or timeout is reached
+  }
+  debug_print("Escaped waiting in getVoltage\n");
+  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) voltagePulseLength = 0;
   unsigned long localVoltagePulseLength = voltagePulseLength;
   lastVoltagePulseLength = localVoltagePulseLength;
    return (localVoltagePulseLength > 0) ? (float)voltageMultiplier / (float)localVoltagePulseLength : 0;
 }
 
 float PowerMeter::getCurrent(){
-  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT) currentPulseLength = 0;
-  if(voltageMode){
+  if(meterMode){
     swapCfMode();
   }
+  if(pulsesReceived != 2){
+    unsigned long timestamp = millis();
+    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){
+      yield();
+    } //busy wait until we get frequency or timeout is reached
+  }
+  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) currentPulseLength = 0;
   unsigned long localCurrentPulseLength = currentPulseLength;
   lastCurrentPulseLength = localCurrentPulseLength;
    return (localCurrentPulseLength > 0) ? (float)currentMultiplier / (float)localCurrentPulseLength : 0;
@@ -53,9 +67,6 @@ unsigned long PowerMeter::getPowerPulse(){
  * @return current pulse length registered when last calling getCurrent() 
  */
 unsigned long PowerMeter::getCurrentPulse(){
-  if(voltageMode){
-    swapCfMode();
-  }
   return lastCurrentPulseLength;
 }
 
@@ -64,17 +75,15 @@ unsigned long PowerMeter::getCurrentPulse(){
  */
 
 unsigned long PowerMeter::getVoltagePulse(){
-  if(!voltageMode){
-    swapCfMode();
-  }
   return lastVoltagePulseLength;
 }
 
 void IRAM_ATTR PowerMeter::cf1Interrupt() {
     unsigned long now = micros();
-    if(voltageMode) voltagePulseLength = now - lastCf1InterruptTimestamp;
+    if(meterMode) voltagePulseLength = now - lastCf1InterruptTimestamp;
     else currentPulseLength = now - lastCf1InterruptTimestamp;
     lastCf1InterruptTimestamp = now;
+    if(pulsesReceived < 2) pulsesReceived++;
 }
 void IRAM_ATTR PowerMeter::cfInterrupt() {
     unsigned long now = micros();
@@ -84,10 +93,11 @@ void IRAM_ATTR PowerMeter::cfInterrupt() {
 }
 
 void PowerMeter::swapCfMode(){
-  voltageMode = !voltageMode;
-  digitalWrite(selPin,voltageMode);
-  delay(swapWait);
-  lastCfInterruptTimestamp = micros();
+  meterMode = !meterMode;
+  digitalWrite(selPin,meterMode);
+  delayMicroseconds(swapWait);
+  pulsesReceived = 0;
+  //lastCfInterruptTimestamp = micros();
 }
 
 void PowerMeter::calibrateVoltage(float expected){

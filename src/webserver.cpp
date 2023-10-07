@@ -100,21 +100,22 @@ void handle_root() {
     //---------------------------------
     tosend.replace("_POWER_",String(meter.getActivePower()));
     tosend.replace("_PWRPULSE_",String(meter.getPowerPulse()));
-    if(measureVoltage)
-    {
-        tosend.replace("_VOLTAGE_",String(meter.getVoltage()));
-        tosend.replace("_VPULSE_",String(meter.getVoltagePulse()));
-    }
     if(measureCurrent)
     {
         tosend.replace("_CURRENT_",String(meter.getCurrent()));
         tosend.replace("_CPULSE_",String(meter.getCurrentPulse())); 
+    }
+    if(measureVoltage)
+    {
+        tosend.replace("_VOLTAGE_",String(meter.getVoltage()));
+        tosend.replace("_VPULSE_",String(meter.getVoltagePulse()));
     }
     tosend.replace("_PMUL_",String(meter.getPowerMultiplier()));
     tosend.replace("_CMUL_",String(meter.getCurrentMultiplier()));
     tosend.replace("_VMUL_",String(meter.getVoltageMultiplier()));
     tosend.replace("_ENERGY_",String(meter.getEnergyMeasurement()));
     tosend.replace("_PPULSE_",String(meter.getPulseCount()));
+    if(measureCurrent && measureVoltage) meter.swapCfMode(); //swap mode to current already so we might be able to skip busywait on current request
     relayStatus ? tosend.replace("_RELAY_","Enabled") : tosend.replace("_RELAY_","Disabled");
     tosend.replace("_NAME_",deviceName);
     server.send(200, "text/html", tosend);

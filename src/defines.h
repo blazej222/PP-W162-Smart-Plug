@@ -30,6 +30,7 @@ Power: 3540000.00
 #define METERING_TIMEOUT 500000 //after this time in microseconds if power meter hasn't received any pulse, pulse value will be reset to 0
 #define LED_BLINK_EVERY 10000
 #define LED_BLINK_FOR 300
+#define METER_MODESWAP_TIMEOUT 800 //miliseconds
 
 #ifdef DEBUG_BUILD
     #define debug_print(x) Serial.print(x)

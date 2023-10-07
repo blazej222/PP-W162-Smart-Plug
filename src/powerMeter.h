@@ -19,15 +19,16 @@ class PowerMeter
     unsigned long lastVoltagePulseLength = 0;
     unsigned long lastCurrentPulseLength = 0;
 
-    bool voltageMode = false;
+    bool meterMode = false;
 
     unsigned int voltageMultiplier = VOLTAGE_RATIO;
     unsigned int powerMultiplier = POWER_RATIO;
     unsigned int currentMultiplier = CURRENT_RATIO;
     unsigned int swapWait = 500; //amount of miliseconds to wait before switching current/voltage
+
+    volatile short pulsesReceived = 0; //if is equal to 2 it means we have received frequency 
     
     void setup();
-    void swapCfMode();
     public:
         PowerMeter(uint8_t _relay,uint8_t _sel,uint8_t _cf1,uint8_t _cf);
         float getActivePower();
@@ -50,4 +51,5 @@ class PowerMeter
         void calibratePower(float expected);
         void setMultipliers(unsigned int voltage,unsigned int power,unsigned int current);
         void resetEnergyMeasurement();
+        void swapCfMode();
 };
