@@ -4,3 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 notes
+data/*
+flash_image/config.cfg

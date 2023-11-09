@@ -19,7 +19,7 @@ class PowerMeter
     unsigned long lastVoltagePulseLength = 0;
     unsigned long lastCurrentPulseLength = 0;
 
-    bool meterMode = false;
+    bool meterMode = false; //1 is voltage, 0 is current
 
     unsigned int voltageMultiplier = VOLTAGE_RATIO;
     unsigned int powerMultiplier = POWER_RATIO;
