@@ -15,7 +15,7 @@ class CollectedStats{
     public:
     CollectedStats(int size);
     ~CollectedStats();
-    void collectStat(PowerMeter meter);
+    void collectStat();
     void forceSendStatistics();
 };
 
@@ -33,4 +33,5 @@ void sendEnergyData(float x);
 
 extern bool measureCurrent;
 extern bool measureVoltage;
+extern PowerMeter meter;
 

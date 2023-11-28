@@ -43,7 +43,7 @@ void CollectedStats::forceSendStatistics(){
     if(iterator != 0) sendStatistics(); //if there's any data that can be sent, send it
 }
 
-void CollectedStats::collectStat(PowerMeter meter){
+void CollectedStats::collectStat(){
     debug_print("Collecting stats\n");
     debug_print("Max storage size:");
     debug_print(size);
@@ -51,11 +51,11 @@ void CollectedStats::collectStat(PowerMeter meter){
     debug_print(iterator);
     debug_print("\n");
     time[iterator] = timeClient.getEpochTime();
+    power[iterator] = meter.getActivePower();
     if(measureCurrent)current[iterator] = meter.getCurrent();
     else current[iterator] = 0;
     if(measureVoltage)voltage[iterator] = meter.getVoltage();
     else voltage[iterator] = 0;
-    power[iterator] = meter.getActivePower();
     iterator++;
     if(measureCurrent && measureVoltage) meter.swapCfMode(); //swap mode to current already so we might be able to skip busywait on current request
     if(iterator >= size) sendStatistics();

@@ -188,7 +188,7 @@ void loop() {
   //collect statistics
   if(millis()-lastTimeStatCollected >= (statCollectingFrequency*1000) && statCollectingFrequency != 0 && statSendingFrequency != 0){ 
     lastTimeStatCollected = millis();
-    stats->collectStat(meter);
+    stats->collectStat();
   }
 
   //collect energy data

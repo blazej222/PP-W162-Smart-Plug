@@ -26,14 +26,12 @@ float PowerMeter::getVoltage(){
   if(!meterMode){
     swapCfMode();
   }
-  debug_print("Before entering getVoltage");
   if(pulsesReceived != 2){
     unsigned long timestamp = millis();
     while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){
       yield();
     } //busy wait until we get frequency or timeout is reached
   }
-  debug_print("Escaped waiting in getVoltage\n");
   if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) voltagePulseLength = 0;
   unsigned long localVoltagePulseLength = voltagePulseLength;
   lastVoltagePulseLength = localVoltagePulseLength;
