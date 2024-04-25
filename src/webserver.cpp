@@ -11,6 +11,8 @@ String mainpage;
 String settingspage;
 String submitpage;
 
+bool debugEnabled = false;
+
 bool relayStatus = false;
 
 uint8_t mainWebsiteRefreshRate;
@@ -35,6 +37,7 @@ void handle_settings(){
     if(enableRelayOnPowerUp)tmp.replace("_CHCK_","checked");
     if(measureVoltage)tmp.replace("_VOLTAGEBOX_","checked");
     if(measureCurrent)tmp.replace("_CURRENTBOX_","checked");
+    if(debugEnabled)tmp.replace("_DEBUGBOX_","checked");
     tmp.replace("_ENERGYTIME_",String(energySendingFrequency));
     tmp.replace("_STATTIME_",String(statCollectingFrequency));
     tmp.replace("_STATSEND_",String(statSendingFrequency));
@@ -43,6 +46,9 @@ void handle_settings(){
     if(LEDmode==0) tmp.replace("_selected0","selected");
     else if(LEDmode==1) tmp.replace("_selected1","selected");
     else if(LEDmode==2) tmp.replace("_selected2","selected");
+    tmp.replace("_VLTMULT_",String(meter.getVoltageMultiplier()));
+    tmp.replace("_CRTMULT_",String(meter.getCurrentMultiplier()));
+    tmp.replace("_PWRMULT_",String(meter.getPowerMultiplier()));
     server.send(200, "text/html", tmp);
 }
 
@@ -70,6 +76,26 @@ void handle_settings_submit(){
     else measureVoltage = false;
     if(server.arg("currentbox") == "on") measureCurrent = true;
     else measureCurrent = false;
+    if(server.arg("debugbox") == "on"){
+        //if debug was disabled and is enabled now
+        if(!debugEnabled){ 
+            //Re-read mainpage
+            File tmp = LittleFS.open("/main_debug.html","r");
+            mainpage = tmp.readString();
+            tmp.close();
+        }
+        debugEnabled = true;
+    } 
+    else{
+        //if debug was enabled and is disabled now
+        if(debugEnabled){
+            //Re-read mainpage
+            File tmp = LittleFS.open("/main.html","r");
+            mainpage = tmp.readString();
+            tmp.close();
+        }
+        debugEnabled = false;
+    } 
     deviceName = server.arg("name");
     meter.setSwapWait(server.arg("DELAY").toInt());
     energySendingFrequency = server.arg("ENERGYTIME").toInt();
@@ -103,18 +129,15 @@ void handle_root() {
     if(measureCurrent)
     {
         tosend.replace("_CURRENT_",String(meter.getCurrent()));
-        tosend.replace("_CPULSE_",String(meter.getCurrentPulse())); 
+        if(debugEnabled) tosend.replace("_CPULSE_",String(meter.getCurrentPulse())); 
     }
     if(measureVoltage)
     {
         tosend.replace("_VOLTAGE_",String(meter.getVoltage()));
-        tosend.replace("_VPULSE_",String(meter.getVoltagePulse()));
+        if(debugEnabled) tosend.replace("_VPULSE_",String(meter.getVoltagePulse()));
     }
-    tosend.replace("_PMUL_",String(meter.getPowerMultiplier()));
-    tosend.replace("_CMUL_",String(meter.getCurrentMultiplier()));
-    tosend.replace("_VMUL_",String(meter.getVoltageMultiplier()));
+    if(debugEnabled) tosend.replace("_PPULSE_",String(meter.getPulseCount()));
     tosend.replace("_ENERGY_",String(meter.getEnergyMeasurement()));
-    tosend.replace("_PPULSE_",String(meter.getPulseCount()));
     if(measureCurrent && measureVoltage) meter.swapCfMode(); //swap mode to current already so we might be able to skip busywait on current request
     relayStatus ? tosend.replace("_RELAY_","Enabled") : tosend.replace("_RELAY_","Disabled");
     tosend.replace("_NAME_",deviceName);
@@ -124,6 +147,14 @@ void handle_root() {
 
 void handle_reset(){
     meter.resetEnergyMeasurement();
+    server.send(200,"text/html",submitpage);
+}
+
+void handle_set_multipliers(){
+    unsigned int voltageMultiplier = server.arg("voltagemult").toInt();
+    unsigned int currentMultiplier = server.arg("currentmult").toInt();
+    unsigned int powerMultiplier = server.arg("powermult").toInt();
+    meter.setMultipliers(voltageMultiplier,powerMultiplier,currentMultiplier);
     server.send(200,"text/html",submitpage);
 }
 
@@ -146,6 +177,7 @@ void initServer(){
     server.on("/settings",handle_settings);
     server.on("/generate_204", handle_root);
     server.on("/calibrate", HTTP_POST, handle_calibrate_submit);
+    server.on("/setmultipliers",HTTP_POST,handle_set_multipliers);
     server.on("/submit", HTTP_POST, handle_settings_submit);
     server.on("/reset",handle_reset);
     //server.onNotFound(handleNotFound);

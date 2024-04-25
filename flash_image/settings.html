@@ -5,13 +5,22 @@
     </head>
     <body>
         <h3>Energy meter settings</h3>
+        Recalibration: <br>
         If you don't want to recalibrate a parameter leave it empty.
-        Recalibration:
+
         <form action='/calibrate' method='post'>
             Voltage: <input type='text' name='voltage' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
             Current: <input type='text' name='current' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
             Power: <input type='text' name='power' pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
             <input type='submit' value='Calibrate'>
+        </form>
+        <br>
+        Manually set multipliers:
+        <form action='/setmultipliers' method='post'>
+            Voltage multiplier: <input type='text' name='voltagemult' value="_VLTMULT_" pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
+            Current multiplier: <input type='text' name='currentmult' value="_CRTMULT_" pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
+            Power multiplier: <input type='text' name='powermult' value="_PWRMULT_" pattern="^(?:-(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))|(?:0|(?:[1-9](?:\d{0,2}(?:,\d{3})+|\d*))))(?:.\d+|)$"><br>
+            <input type='submit' value='Set multipliers'>
         </form>
         <form action='/submit' method='post'>
             Device name: <input type='text' name='name' value="_NAME_"><br>
@@ -32,6 +41,7 @@
             Functionalities enabled: <br>
             Voltage <input type='checkbox' name='voltagebox' _VOLTAGEBOX_><br>
             Current <input type='checkbox' name='currentbox' _CURRENTBOX_><br>
+            Enable debugging <input type='checkbox' name='debugbox' _DEBUGBOX_><br>
             Send energy measurements to server every <input type='text' name='ENERGYTIME' value="_ENERGYTIME_" pattern="^\d+$"> minutes.<br>
             Collect statistics every <input type='text' name='STATTIME' value="_STATTIME_" pattern="^\d+$"> seconds.<br>
             Send statistics every <input type='text' name='STATSEND' value="_STATSEND_" pattern="^\d+$"> probes.<br>
