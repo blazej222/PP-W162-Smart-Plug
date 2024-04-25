@@ -21,9 +21,9 @@ Current: 26506.00
 Voltage: 265613.72
 Power: 3540000.00
 */
-#define CURRENT_RATIO             26506
-#define VOLTAGE_RATIO             158227 //265613
-#define POWER_RATIO               3540000
+#define CURRENT_RATIO             13259
+#define VOLTAGE_RATIO             134147 
+#define POWER_RATIO               1674421
 
 //Misc
 #define WIFI_TIMEOUT 10000 //after this time in miliseconds if unable to connect to network, AP will be started

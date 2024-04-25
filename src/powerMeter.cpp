@@ -78,9 +78,12 @@ unsigned long PowerMeter::getVoltagePulse(){
 
 void IRAM_ATTR PowerMeter::cf1Interrupt() {
     unsigned long now = micros();
+    //if true we are measuring voltage
     if(meterMode) voltagePulseLength = now - lastCf1InterruptTimestamp;
+    //if false we are measuring current
     else currentPulseLength = now - lastCf1InterruptTimestamp;
     lastCf1InterruptTimestamp = now;
+    //increment pulses counter
     if(pulsesReceived < 2) pulsesReceived++;
 }
 void IRAM_ATTR PowerMeter::cfInterrupt() {
