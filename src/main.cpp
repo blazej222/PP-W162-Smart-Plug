@@ -164,7 +164,7 @@ void setup() {
   if(enableRelayOnPowerUp){
     enableRelay();
   }
-  configTime("CET-1CEST,M3.5.0,M10.5.0/3","pl.pool.ntp.org");
+  configTime(TIMEZONE,NTP_SERVER);
   settimeofday_cb(timeSetCallback);
   debug_print("Initializing Wifi \n");
   initWifi();

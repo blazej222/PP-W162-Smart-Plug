@@ -31,6 +31,8 @@ Power: 3540000.00
 #define LED_BLINK_EVERY 10000
 #define LED_BLINK_FOR 300
 #define METER_MODESWAP_TIMEOUT 800 //miliseconds
+#define NTP_SERVER "pl.pool.ntp.org"
+#define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #ifdef DEBUG_BUILD
     #define debug_print(x) Serial.print(x)

@@ -15,38 +15,51 @@ void PowerMeter::setup(){
 
 }
 
+/**
+ * 
+ * @return Active power usage value in watts
+ */
 float PowerMeter::getActivePower(){
-  if ((micros() - lastCfInterruptTimestamp) > METERING_TIMEOUT) powerPulseLength = 0; //if no changes received for some time
-  unsigned long localPowerPulseLength = powerPulseLength; //make sure an interrupt does not change any values mid processing
+  if ((micros() - lastCfInterruptTimestamp) > METERING_TIMEOUT) powerPulseLength = 0;             //if no changes received for some time
+  unsigned long localPowerPulseLength = powerPulseLength;                                         //make sure an interrupt does not change any values mid processing
   lastPowerPulseLength = localPowerPulseLength;
   return (localPowerPulseLength > 0) ? (float)powerMultiplier / (float)localPowerPulseLength : 0; // return power usage
 }
 
+
+/**
+ * 
+ * @return Voltage value in volts
+ */
 float PowerMeter::getVoltage(){
   if(!meterMode){
     swapCfMode();
   }
   if(pulsesReceived != 2){
     unsigned long timestamp = millis();
-    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){
+    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){  //busy wait until we get frequency or timeout is reached
       yield();
-    } //busy wait until we get frequency or timeout is reached
+    } 
   }
-  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) voltagePulseLength = 0;
+  if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) voltagePulseLength = 0;     
   unsigned long localVoltagePulseLength = voltagePulseLength;
   lastVoltagePulseLength = localVoltagePulseLength;
    return (localVoltagePulseLength > 0) ? (float)voltageMultiplier / (float)localVoltagePulseLength : 0;
 }
 
+/**
+ * 
+ * @return Current value in amperes
+ */
 float PowerMeter::getCurrent(){
-  if(meterMode){
+  if(meterMode){  //if meter is currently in measuring voltage mode we need to switch it to measuring current mode
     swapCfMode();
   }
   if(pulsesReceived != 2){
     unsigned long timestamp = millis();
-    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){
+    while(pulsesReceived != 2 && millis()-timestamp < METER_MODESWAP_TIMEOUT){     //busy wait until we get frequency or timeout is reached
       yield();
-    } //busy wait until we get frequency or timeout is reached
+    } 
   }
   if ((micros() - lastCf1InterruptTimestamp) > METERING_TIMEOUT || pulsesReceived != 2) currentPulseLength = 0;
   unsigned long localCurrentPulseLength = currentPulseLength;
@@ -55,23 +68,22 @@ float PowerMeter::getCurrent(){
 }
 
 /**
- * @return power pulse length registered when last calling getActivePower()
+ * @return raw power pulse length registered when last calling getActivePower()
  */
 unsigned long PowerMeter::getPowerPulse(){
   return lastPowerPulseLength;
 }
 
 /**
- * @return current pulse length registered when last calling getCurrent() 
+ * @return raw current pulse length registered when last calling getCurrent() 
  */
 unsigned long PowerMeter::getCurrentPulse(){
   return lastCurrentPulseLength;
 }
 
 /**
- * @return voltage pulse length registered when last calling getVoltage()
+ * @return raw voltage pulse length registered when last calling getVoltage()
  */
-
 unsigned long PowerMeter::getVoltagePulse(){
   return lastVoltagePulseLength;
 }

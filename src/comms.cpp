@@ -1,6 +1,5 @@
 #include "comms.h"
 #include "powerMeter.h"
-#include <WiFiUdp.h>
 
 unsigned int statCollectingFrequency = 0; //collect statistics every seconds
 unsigned int energySendingFrequency = 0; //send energy usage every minutes
