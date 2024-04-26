@@ -25,6 +25,11 @@ bool measureVoltage = true;
 bool measureCurrent = false;
 unsigned short LEDmode = 1; // 0 is disabled, 1 is as relay, 2 is blink every 10 seconds
 bool blinkPhase = false;
+extern time_t timeOfLastMeterReset;
+
+void timeSetCallback(){
+if(timeOfLastMeterReset <= 1714143023) time(&timeOfLastMeterReset);
+}
 
 void IRAM_ATTR cf1IRQ(){
   meter.cf1Interrupt();
@@ -159,6 +164,8 @@ void setup() {
   if(enableRelayOnPowerUp){
     enableRelay();
   }
+  configTime("CET-1CEST,M3.5.0,M10.5.0/3","pl.pool.ntp.org");
+  settimeofday_cb(timeSetCallback);
   debug_print("Initializing Wifi \n");
   initWifi();
   debug_print("Initializing webserver \n");
@@ -180,7 +187,6 @@ void loop() {
   }
   #endif
 
-  timeClient.update(); //update current time if required
   server.handleClient();
 
   if(WiFi.status() == WL_NO_SSID_AVAIL) initWifi(); //FIXME: Program execution will halt if WiFi signal is lost

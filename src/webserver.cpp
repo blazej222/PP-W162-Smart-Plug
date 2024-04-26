@@ -17,6 +17,34 @@ bool relayStatus = false;
 
 uint8_t mainWebsiteRefreshRate;
 
+time_t timeOfLastMeterReset;
+
+String convertToReadableDate(time_t epochtime){
+    tm timeStruct;
+    localtime_r(&epochtime,&timeStruct);
+    int year = timeStruct.tm_year+1900;
+    int dayOfMonth = timeStruct.tm_mday;
+    int month = timeStruct.tm_mon+1;
+    int hour = timeStruct.tm_hour;
+    int minute = timeStruct.tm_min;
+    int second = timeStruct.tm_sec;
+
+    String leadingZeroDayOfMonth = "";
+    String leadingZeroMonth = "";
+    String leadingZeroHour = "";
+    String leadingZeroMinute = "";
+    String leadingZeroSecond = "";
+    if(dayOfMonth<10) leadingZeroDayOfMonth = "0";
+    if(month<10) leadingZeroMonth = "0";
+    if(hour<10) leadingZeroHour = "0";
+    if(minute<10) leadingZeroMinute = "0";
+    if(second<10) leadingZeroSecond = "0";
+
+    String readableDate = leadingZeroDayOfMonth + String(dayOfMonth) + "." + leadingZeroMonth + String(month) + "." + String(year) + " " \
+        + leadingZeroHour + String(hour) + ":" + leadingZeroMinute + String(minute) + ":" + leadingZeroSecond + String(second);
+    return readableDate;
+}
+
 void handle_enable(){
     enableRelay();
     server.send(200, "text/html", submitpage);
@@ -141,12 +169,18 @@ void handle_root() {
     if(measureCurrent && measureVoltage) meter.swapCfMode(); //swap mode to current already so we might be able to skip busywait on current request
     relayStatus ? tosend.replace("_RELAY_","Enabled") : tosend.replace("_RELAY_","Disabled");
     tosend.replace("_NAME_",deviceName);
+    //Get readable date
+    time_t timenow = 0;
+    time(&timenow);
+    tosend.replace("_TIME_",convertToReadableDate(timenow));
+    tosend.replace("_ENERGYDATE_",convertToReadableDate(timeOfLastMeterReset));
     server.send(200, "text/html", tosend);
     delay(100);
 }
 
 void handle_reset(){
     meter.resetEnergyMeasurement();
+    time(&timeOfLastMeterReset);
     server.send(200,"text/html",submitpage);
 }
 
@@ -182,5 +216,6 @@ void initServer(){
     server.on("/reset",handle_reset);
     //server.onNotFound(handleNotFound);
     updater.setup(&server);
+    time(&timeOfLastMeterReset);
     server.begin();
 }

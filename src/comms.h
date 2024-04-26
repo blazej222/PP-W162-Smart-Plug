@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include "powerMeter.h"
-#include <NTPClient.h>
 class CollectedStats{
-    unsigned long* time;
+    time_t* timestamp;
     float* voltage;
     float* power;
     float* current;
@@ -26,7 +25,6 @@ extern IPAddress dataCollectingServerIP;
 extern WiFiClient client;
 extern uint16_t dataCollectingServerPort;
 extern CollectedStats* stats;
-extern NTPClient timeClient;
 extern String deviceName;
 
 void sendEnergyData(float x);

@@ -1,7 +1,6 @@
 #include "comms.h"
 #include "powerMeter.h"
 #include <WiFiUdp.h>
-#include <NTPClient.h>
 
 unsigned int statCollectingFrequency = 0; //collect statistics every seconds
 unsigned int energySendingFrequency = 0; //send energy usage every minutes
@@ -10,11 +9,9 @@ IPAddress dataCollectingServerIP;
 WiFiClient client;
 uint16_t dataCollectingServerPort;
 CollectedStats* stats = nullptr;
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"pool.ntp.org",0,86400000);
 
 CollectedStats::CollectedStats(int _size){
-    time = new unsigned long[_size+20];
+    timestamp = new time_t[_size+20];
     voltage = new float[_size+20];
     current = new float[_size+20];
     power = new float[_size+20];
@@ -23,7 +20,7 @@ CollectedStats::CollectedStats(int _size){
 }
 
 CollectedStats::~CollectedStats(){
-    delete[] time;
+    delete[] timestamp;
     delete[] voltage;
     delete[] current;
     delete[] power;
@@ -32,7 +29,7 @@ CollectedStats::~CollectedStats(){
 void CollectedStats::zeroStatus(){
     iterator = 0;
     for(int i = 0;i<size+20;i++){
-        time[i] = 0;
+        timestamp[i] = 0;
         voltage[i] = 0.;
         current[i] = 0.;
         power[i] = 0.;
@@ -50,7 +47,7 @@ void CollectedStats::collectStat(){
     debug_print("\nCurrent storage size:");
     debug_print(iterator);
     debug_print("\n");
-    time[iterator] = timeClient.getEpochTime();
+    time(&(timestamp[iterator])); //TODO:Check if that works
     power[iterator] = meter.getActivePower();
     if(measureCurrent)current[iterator] = meter.getCurrent();
     else current[iterator] = 0;
@@ -66,7 +63,7 @@ String CollectedStats::serialize(){
     String tmp = deviceName;
     tmp += "T:";
     for(int i = 0;i<iterator;i++){
-        tmp += time[i];
+        tmp += timestamp[i];
         tmp += ";";
     } 
     tmp += "V:";
