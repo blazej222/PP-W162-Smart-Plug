@@ -3,6 +3,7 @@
 #include "webserver.h"
 #include "defines.h"
 #include "comms.h"
+#include <build_info.h>
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer updater;
@@ -18,6 +19,8 @@ bool relayStatus = false;
 uint8_t mainWebsiteRefreshRate;
 
 time_t timeOfLastMeterReset;
+
+extern byte macaddr[6];
 
 String convertToReadableDate(time_t epochtime){
     tm timeStruct;
@@ -57,6 +60,9 @@ void handle_disable(){
 
 void handle_settings(){
     String tmp = settingspage;
+    tmp.replace("__BUILD_DATE__",BUILD_TIME);
+    tmp.replace("__COMMIT_HASH__",GIT_COMMIT);
+    tmp.replace("__MAC_ADDRESS__",String((const char *)macaddr)); //FIXME: Prints garbage (int value, convert to hex string)
     tmp.replace("_RATE_",String(mainWebsiteRefreshRate));
     tmp.replace("_SSID_",SSID);
     tmp.replace("_PASSWORD_",KEY);
