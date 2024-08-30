@@ -26,7 +26,7 @@ bool measureCurrent = false;
 unsigned short LEDmode = 1; // 0 is disabled, 1 is as relay, 2 is blink every 10 seconds
 bool blinkPhase = false;
 extern time_t timeOfLastMeterReset;
-byte macaddr[7];
+char macAddress[18];
 
 void timeSetCallback(){
 if(timeOfLastMeterReset <= 1714143023) time(&timeOfLastMeterReset);
@@ -62,8 +62,15 @@ void initWifi(){
   debug_print(KEY);
   debug_print("\n");
   WiFi.begin(SSID,KEY);
+  byte macaddr[6];
+  uint8_t iterator = 0;
   WiFi.macAddress(macaddr);
-  macaddr[6] = '\0';
+  for(uint8_t i = 0;i<6;i++){
+    iterator += sprintf(macAddress+iterator,"%02X",macaddr[i]);
+    macAddress[iterator] = ':';
+    iterator++;
+  }
+  macAddress[17] = '\0';
   unsigned long t1 = millis();
   while (WiFi.status() != WL_CONNECTED){
     yield();

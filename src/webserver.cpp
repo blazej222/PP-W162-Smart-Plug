@@ -20,7 +20,7 @@ uint8_t mainWebsiteRefreshRate;
 
 time_t timeOfLastMeterReset;
 
-extern byte macaddr[6];
+extern char macAddress[13];
 
 String convertToReadableDate(time_t epochtime){
     tm timeStruct;
@@ -62,7 +62,7 @@ void handle_settings(){
     String tmp = settingspage;
     tmp.replace("__BUILD_DATE__",BUILD_TIME);
     tmp.replace("__COMMIT_HASH__",GIT_COMMIT);
-    tmp.replace("__MAC_ADDRESS__",String((const char *)macaddr)); //FIXME: Prints garbage (int value, convert to hex string)
+    tmp.replace("__MAC_ADDRESS__",String((const char *)macAddress));
     tmp.replace("_RATE_",String(mainWebsiteRefreshRate));
     tmp.replace("_SSID_",SSID);
     tmp.replace("_PASSWORD_",KEY);
