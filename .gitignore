@@ -8,3 +8,4 @@ data/*
 flash_image/config.cfg
 include/build_info.h
 last_build_hash.txt
+include/build_info.h
